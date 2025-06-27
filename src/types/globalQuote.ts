@@ -1,7 +1,7 @@
 
 export interface AlphaVantageBaseResponse {
     "Error Message"?: string;
-    "Information"?: string; 
+    "Note"?: string;
 }
 
 export interface GlobalQuoteData {
@@ -21,4 +21,11 @@ export interface GlobalQuoteSuccessResponse extends AlphaVantageBaseResponse {
     "Global Quote": GlobalQuoteData;
 }
 
-export type GlobalQuoteAPIResponse = GlobalQuoteSuccessResponse | AlphaVantageBaseResponse;
+export interface AlphaVantageInformationResponse extends AlphaVantageBaseResponse {
+    "Information": string;
+}
+
+export type GlobalQuoteAPIResponse =
+    GlobalQuoteSuccessResponse |
+    AlphaVantageBaseResponse |
+    AlphaVantageInformationResponse; 

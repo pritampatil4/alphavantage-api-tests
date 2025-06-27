@@ -1,6 +1,10 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
-import config from '../../config';
-import { GlobalQuoteAPIResponse, AlphaVantageBaseResponse } from '../types/globalQuote';
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
+import config from "../../config";
+import {
+    GlobalQuoteAPIResponse,
+    AlphaVantageInformationResponse,
+} from "../types/globalQuote";
+import { AlphaVantageAPIRateLimitError } from "../types/errors";
 
 export class AlphaVantageClient {
     private client: AxiosInstance;
@@ -15,7 +19,7 @@ export class AlphaVantageClient {
         });
 
         this.client.interceptors.response.use(
-            response => response,
+            (response) => response,
             (error: AxiosError) => {
                 if (error.response) {
                     console.error(
@@ -23,9 +27,15 @@ export class AlphaVantageClient {
                         error.response.data
                     );
                 } else if (error.request) {
-                    console.error('[API Client Error] No response received:', error.request);
+                    console.error(
+                        "[API Client Error] No response received:",
+                        error.request
+                    );
                 } else {
-                    console.error('[API Client Error] Error setting up request:', error.message);
+                    console.error(
+                        "[API Client Error] Error setting up request:",
+                        error.message
+                    );
                 }
                 return Promise.reject(error);
             }
@@ -39,10 +49,23 @@ export class AlphaVantageClient {
      */
     public async getGlobalQuote(symbol: string): Promise<GlobalQuoteAPIResponse> {
         const params = {
-            function: 'GLOBAL_QUOTE',
+            function: "GLOBAL_QUOTE",
             symbol: symbol,
         };
-        const response: AxiosResponse<GlobalQuoteAPIResponse> = await this.client.get('', { params });
-        return response.data;
+        const response: AxiosResponse<GlobalQuoteAPIResponse> =
+            await this.client.get("", { params });
+        const responseData = response.data;
+
+        if (
+            "Information" in responseData &&
+            (responseData as AlphaVantageInformationResponse).Information.includes(
+                "API rate limit is"
+            )
+        ) {
+            throw new AlphaVantageAPIRateLimitError(
+                (responseData as AlphaVantageInformationResponse).Information
+            );
+        }
+        return responseData;
     }
 }
