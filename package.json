@@ -1,0 +1,30 @@
+{
+  "name": "alphavantage-api-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pritampatil4/alphavantage-api-tests.git"
+  },
+  "keywords": ["api", "tests", "alphavantage", "jest", "typescript"],
+  "author": "Pritam Patil",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pritampatil4/alphavantage-api-tests/issues"
+  },
+  "homepage": "https://github.com/pritampatil4/alphavantage-api-tests#readme",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.4",
+    "axios": "^1.10.0",
+    "dotenv": "^16.6.0",
+    "jest": "^30.0.3",
+    "ts-jest": "^29.4.0"
+  }
+}
