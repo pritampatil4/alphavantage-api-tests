@@ -29,8 +29,7 @@ describe("Alpha Vantage Global Quote API Tests", () => {
             expect(globalQuote["07. latest trading day"]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         } catch (error) {
             if (error instanceof AlphaVantageAPIRateLimitError) {
-                console.warn(
-                    `API Rate Limit Detected for ${symbol} (Test Passed by Design): ${error.message}`
+                console.warn(`API Rate Limit Detected for ${symbol} (Test Passed by Design): ${error.message}`
                 );
             } else {
                 throw error;
@@ -50,8 +49,7 @@ describe("Alpha Vantage Global Quote API Tests", () => {
             }
         } catch (error) {
             if (error instanceof AlphaVantageAPIRateLimitError) {
-                console.warn(
-                    `API Rate Limit Detected for ${symbol} (Test Passed by Design): ${error.message}`
+                console.warn(`API Rate Limit Detected for ${symbol} (Test Passed by Design): ${error.message}`
                 );
             } else {
                 throw error;
