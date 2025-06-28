@@ -6,6 +6,7 @@ import {
     isGlobalQuoteEmptyResponse
 } from "../src/types/globalQuote";
 import { AlphaVantageAPIRateLimitError } from "../src/types/errors";
+import { GLOBAL_QUOTE_RESPONSE_KEYS } from "./utils/globalQuoteResponseKeys";
 
 let apiClient: AlphaVantageClient;
 beforeAll(() => {
@@ -15,18 +16,6 @@ beforeAll(() => {
 describe("AlphaVantage Global Quote API Tests", () => {
     test("Should return a global quote for a valid symbol (MSFT) or indicate rate limit", async () => {
         const symbol = "MSFT";
-        const responseKeys = [
-            '01. symbol',
-            '02. open',
-            '03. high',
-            '04. low',
-            '05. price',
-            '06. volume',
-            '07. latest trading day',
-            '08. previous close',
-            '09. change',
-            '10. change percent'
-        ]
         try {
             const response: GlobalQuoteAPIResponse = await apiClient.getGlobalQuote(symbol);
             expect(response).toBeDefined();
@@ -36,7 +25,7 @@ describe("AlphaVantage Global Quote API Tests", () => {
             expect(typeof globalQuote).toBe("object");
             expect(globalQuote).not.toBeNull();
             expect(globalQuote["01. symbol"]).toBe("MSFT");
-            expect(Object.keys(globalQuote)).toEqual(responseKeys);
+            expect(Object.keys(globalQuote)).toEqual(GLOBAL_QUOTE_RESPONSE_KEYS);
             expect(globalQuote["07. latest trading day"]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         } catch (error) {
             if (error instanceof AlphaVantageAPIRateLimitError) {
@@ -49,10 +38,10 @@ describe("AlphaVantage Global Quote API Tests", () => {
         }
     });
 
-    test("Should return an empty object of Global Quote for a non-existent symbol", async () => {
+    test("Should return an empty object of Global Quote for a non-existent symbol or indicate rate limit", async () => {
         const symbol = "NONEXISTENTSTOCK1234";
         try {
-            const response: GlobalQuoteAPIResponse = await apiClient.getGlobalQuote(symbol);  
+            const response: GlobalQuoteAPIResponse = await apiClient.getGlobalQuote(symbol);
             expect(response).toBeDefined();
             expect(typeof response).toBe("object");
             if (isGlobalQuoteEmptyResponse(response)) {
@@ -62,11 +51,33 @@ describe("AlphaVantage Global Quote API Tests", () => {
         } catch (error) {
             if (error instanceof AlphaVantageAPIRateLimitError) {
                 console.warn(
-                    `API Rate Limit Detected for ${symbol} (Test Passed by Design - Thrown Error): ${error.message}`
+                    `API Rate Limit Detected for ${symbol} (Test Passed by Design): ${error.message}`
                 );
             } else {
-                throw error; 
+                throw error;
             }
         }
     });
+
+    test.each(['AAPL', 'GOOG', 'AMZN'])(
+        '[Parameterized]: Should return a global quote for valid symbols or indicate rate limit',
+        async (symbol) => {
+            try {
+                const response: GlobalQuoteAPIResponse = await apiClient.getGlobalQuote(symbol);
+                expect(response).toBeDefined();
+                expect(typeof response).toBe("object");
+                expect(response).toHaveProperty("Global Quote");
+                const globalQuote = (response as { "Global Quote": GlobalQuoteData })["Global Quote"];
+                expect(typeof globalQuote).toBe("object");
+                expect(globalQuote["01. symbol"]).toBe(symbol);
+                expect(Object.keys(globalQuote)).toEqual(GLOBAL_QUOTE_RESPONSE_KEYS);
+            } catch (error) {
+                if (error instanceof AlphaVantageAPIRateLimitError) {
+                    console.warn(`API Rate Limit Detected for ${symbol} (Test Passed by Design): ${error.message}`);
+                } else {
+                    throw error;
+                }
+            }
+        }
+    );
 });
