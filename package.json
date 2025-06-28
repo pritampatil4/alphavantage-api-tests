@@ -31,6 +31,7 @@
     "axios": "^1.10.0",
     "dotenv": "^16.6.0",
     "jest": "^30.0.3",
+    "jest-html-reporter": "^4.3.0",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2"
   }
