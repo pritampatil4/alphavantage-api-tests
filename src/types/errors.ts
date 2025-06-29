@@ -1,6 +1,6 @@
 export class AlphaVantageAPIRateLimitError extends Error {
     constructor(message: string) {
-        super(`Alpha Vantage Rate Limit Exceeded: ${message}`);
+        super(message);
         this.name = 'AlphaVantageRateLimitError';
     }
 }

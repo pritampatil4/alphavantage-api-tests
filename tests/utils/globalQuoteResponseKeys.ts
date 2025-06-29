@@ -1,4 +1,6 @@
-export const GLOBAL_QUOTE_RESPONSE_KEYS = [
+import { GlobalQuoteData } from "../../src/types/globalQuote";
+
+export const GLOBAL_QUOTE_RESPONSE_KEYS: (keyof GlobalQuoteData)[] = [
     '01. symbol',
     '02. open',
     '03. high',

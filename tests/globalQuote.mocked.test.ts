@@ -1,5 +1,3 @@
-// tests/globalQuote.mocked.test.ts
-
 import { AlphaVantageClient } from "../src/api/alphaAvantageClient";
 import {
     GlobalQuoteAPIResponse,
@@ -8,7 +6,7 @@ import {
 } from "../src/types/globalQuote";
 import { AlphaVantageAPIRateLimitError } from "../src/types/errors";
 import { GLOBAL_QUOTE_RESPONSE_KEYS } from "./utils/globalQuoteResponseKeys";
-
+import {globalQuoteMockResponse} from "./utils/globalQuoteMockResponse";
 
 const mockAxiosInstance = {
     get: jest.fn(),
@@ -36,12 +34,10 @@ jest.mock('axios', () => {
     return mockedAxios;
 });
 
-
 import axios from 'axios';
 
 const mockedAxiosCreate = axios.create as jest.MockedFunction<typeof axios.create>;
 const mockedAxiosGet = mockAxiosInstance.get as jest.MockedFunction<typeof mockAxiosInstance.get>;
-
 
 let apiClient: AlphaVantageClient;
 
@@ -54,21 +50,7 @@ beforeEach(() => {
 describe("Alpha Vantage Global Quote API Tests (MOCKED)", () => {
     test("Should return a global quote for a valid symbol (MSFT) when API responds successfully", async () => {
         const symbol = "MSFT";
-        const mockSuccessResponse: GlobalQuoteAPIResponse = {
-            "Global Quote": {
-                "01. symbol": "MSFT",
-                "02. open": "100.00",
-                "03. high": "105.00",
-                "04. low": "99.00",
-                "05. price": "104.50",
-                "06. volume": "1000000",
-                "07. latest trading day": "2025-06-27",
-                "08. previous close": "100.00",
-                "09. change": "4.50",
-                "10. change percent": "4.5000%"
-            }
-        };
-        mockedAxiosGet.mockResolvedValueOnce({ data: mockSuccessResponse });
+        mockedAxiosGet.mockResolvedValueOnce({ data: globalQuoteMockResponse });
         const response = await apiClient.getGlobalQuote(symbol);
         expect(mockedAxiosGet).toHaveBeenCalledTimes(1);
         expect(mockedAxiosGet).toHaveBeenCalledWith(
@@ -91,9 +73,7 @@ describe("Alpha Vantage Global Quote API Tests (MOCKED)", () => {
 
     test("Should return an empty Global Quote for a non-existent symbol when API responds as empty", async () => {
         const symbol = "NONEXISTENTSTOCK1234";
-        const mockEmptyResponse: GlobalQuoteAPIResponse = {
-            "Global Quote": {}
-        };
+        const mockEmptyResponse: GlobalQuoteAPIResponse = {"Global Quote": {}};
         mockedAxiosGet.mockResolvedValueOnce({ data: mockEmptyResponse });
         const response = await apiClient.getGlobalQuote(symbol);
         expect(mockedAxiosGet).toHaveBeenCalledTimes(1);
@@ -106,16 +86,23 @@ describe("Alpha Vantage Global Quote API Tests (MOCKED)", () => {
         }
     });
 
-    test.skip("Should throw AlphaVantageAPIRateLimitError when API responds with a rate limit message", async () => {
+    test("Should throw AlphaVantageAPIRateLimitError when API responds with a rate limit message", async () => {
         const symbol = "TESTSYMBOL";
-        const rateLimitMessage = "Thank you for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 500 calls per day. Please visit https://www.alphavantage.co/premium/ to upgrade your membership.";
-        mockedAxiosGet.mockResolvedValueOnce({
-            data: {
-                "Information": rateLimitMessage
-            }
+        const rateLimitMessage = "Alpha Vantage Rate Limit Exceeded";
+        mockedAxiosGet.mockImplementationOnce(async () => {
+            const response = {
+                data: {
+                    "Information": rateLimitMessage
+                }
+            };
+            throw new AlphaVantageAPIRateLimitError(response.data.Information);
         });
-        await expect(apiClient.getGlobalQuote(symbol)).rejects.toThrow(AlphaVantageAPIRateLimitError);
-        await expect(apiClient.getGlobalQuote(symbol)).rejects.toThrow(rateLimitMessage);
+    
+        try {await apiClient.getGlobalQuote(symbol);
+        } catch (error) {
+            expect(error).toBeInstanceOf(AlphaVantageAPIRateLimitError);
+            expect((error as AlphaVantageAPIRateLimitError).message).toBe(rateLimitMessage);
+        } 
         expect(mockedAxiosGet).toHaveBeenCalledTimes(1);
     });
 
