@@ -13,7 +13,7 @@ beforeAll(() => {
     apiClient = new AlphaVantageClient();
 });
 
-describe.skip("Alpha Vantage Global Quote API Tests", () => {
+describe("Alpha Vantage Global Quote API Tests", () => {
     test("Should return a global quote for a valid symbol (MSFT) or indicate rate limit", async () => {
         const symbol = "MSFT";
         const response = await handleAlphaVantageApiCall<GlobalQuoteAPIResponse>(

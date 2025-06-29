@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "tests": "jest",                           
+    "tests:mocked": "jest --testPathPatterns=\\.mocked\\.test\\.ts$",
+    "tests:live": "jest --testPathPatterns=^((?!mocked).)*\\.test\\.ts$", 
+    "tests:watch": "jest --watch",             
+    "tests:coverage": "jest --coverage"      
   },
   "repository": {
     "type": "git",
