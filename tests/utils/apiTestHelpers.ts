@@ -12,13 +12,12 @@ import { AlphaVantageAPIRateLimitError } from '../../src/types/errors';
 export async function handleAlphaVantageApiCall<T>(
     apiCallPromise: Promise<T>,
     symbol: string
-): Promise<T | null> {
+): Promise<T> {
     try {
         return await apiCallPromise;
     } catch (error) {
         if (error instanceof AlphaVantageAPIRateLimitError) {
             console.warn(`API Rate Limit Detected for ${symbol} (Test Passed by Design): ${error.message}`);
-            return null; 
         }
         throw error;
     }

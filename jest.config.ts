@@ -8,12 +8,12 @@ const config: Config.InitialOptions = {
     verbose: true,
     collectCoverage: true,
     coverageDirectory: "coverage",
-    coverageReporters: ["json", "lcov", "text", "clover"],
+    coverageReporters: ["json"],
     reporters: [
         "default",       
         ["jest-html-reporter", 
           {
-            outputPath: "./test-report.html", 
+            outputPath: "./reports/test-report.html", 
             pageTitle: "Alpha Vantage API Tests Report", 
             includeAll: true,
             includeFailureMsg: true, 

@@ -3,7 +3,7 @@ import { AlphaVantageClient } from "../src/api/alphaAvantageClient";
 import {
     GlobalQuoteAPIResponse,
     GlobalQuoteData,
-    isGlobalQuoteEmptyResponse
+    GlobalQuoteEmptyResponse,
 } from "../src/types/globalQuote";
 import { GLOBAL_QUOTE_RESPONSE_KEYS } from "./utils/globalQuoteResponseKeys";
 import { handleAlphaVantageApiCall } from "./utils/apiTestHelpers";
@@ -20,10 +20,6 @@ describe("Alpha Vantage Global Quote API Tests", () => {
             apiClient.getGlobalQuote(symbol),
             symbol
         );
-        if (response === null) {
-            expect(true).toBe(true); // Test passed by design due to rate limit
-            return;
-        }
         expect(response).toBeDefined();
         expect(typeof response).toBe("object");
         expect(response).toHaveProperty("Global Quote");
@@ -33,25 +29,18 @@ describe("Alpha Vantage Global Quote API Tests", () => {
         expect(globalQuote["01. symbol"]).toBe("MSFT");
         expect(Object.keys(globalQuote)).toEqual(GLOBAL_QUOTE_RESPONSE_KEYS);
         expect(globalQuote["07. latest trading day"]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-
     });
 
     test("Should return an empty object of Global Quote for a non-existent symbol or indicate rate limit", async () => {
         const symbol = "NONEXISTENTSTOCK1234";
-        const response = await handleAlphaVantageApiCall<GlobalQuoteAPIResponse>(
-            apiClient.getGlobalQuote(symbol),
+        const response = await handleAlphaVantageApiCall<GlobalQuoteEmptyResponse>(
+            apiClient.getGlobalQuote(symbol) as Promise<GlobalQuoteEmptyResponse>,
             symbol
         );
-        if (response === null) {
-            expect(true).toBe(true); // Test passed by design due to rate limit
-            return;
-        }
         expect(response).toBeDefined();
-        expect(typeof response).toBe("object");
-        if (isGlobalQuoteEmptyResponse(response)) {
-            expect(response['Global Quote']).toEqual({});
-            expect(Object.keys(response['Global Quote'])).toHaveLength(0);
-        }
+        expect(typeof response).toBe("object");     
+        expect(response['Global Quote']).toEqual({});
+        expect(Object.keys(response['Global Quote'])).toHaveLength(0);     
     });
 
     test.each(['AAPL', 'GOOG', 'AMZN'])(
@@ -61,10 +50,6 @@ describe("Alpha Vantage Global Quote API Tests", () => {
                 apiClient.getGlobalQuote(symbol),
                 symbol
             );
-            if (response === null) {
-                expect(true).toBe(true);
-                return;
-            }
             expect(response).toBeDefined();
             expect(typeof response).toBe("object");
             expect(response).toHaveProperty("Global Quote");
@@ -72,7 +57,6 @@ describe("Alpha Vantage Global Quote API Tests", () => {
             expect(typeof globalQuote).toBe("object");
             expect(globalQuote["01. symbol"]).toBe(symbol);
             expect(Object.keys(globalQuote)).toEqual(GLOBAL_QUOTE_RESPONSE_KEYS);
-
         }
     );
 });

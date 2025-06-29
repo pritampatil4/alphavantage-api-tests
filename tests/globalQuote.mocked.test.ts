@@ -1,31 +1,14 @@
+import axios from 'axios';
 import { AlphaVantageClient } from "../src/api/alphaAvantageClient";
 import {
     GlobalQuoteAPIResponse,
     GlobalQuoteData,
-    isGlobalQuoteEmptyResponse
+    GlobalQuoteEmptyResponse,
 } from "../src/types/globalQuote";
 import { AlphaVantageAPIRateLimitError } from "../src/types/errors";
 import { GLOBAL_QUOTE_RESPONSE_KEYS } from "./utils/globalQuoteResponseKeys";
-import {globalQuoteMockResponse} from "./utils/globalQuoteMockResponse";
-
-const mockAxiosInstance = {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    delete: jest.fn(),
-
-    interceptors: {
-        request: {
-            use: jest.fn(),
-            eject: jest.fn(),
-        },
-        response: {
-            use: jest.fn(),
-            eject: jest.fn(),
-        },
-    },
-
-};
+import { globalQuoteMockResponse } from "./utils/globalQuoteMockResponse";
+import { mockAxiosInstance } from "./utils/mockAxiosInstance";
 
 jest.mock('axios', () => {
     const mockedAxios = {
@@ -34,25 +17,22 @@ jest.mock('axios', () => {
     return mockedAxios;
 });
 
-import axios from 'axios';
-
-const mockedAxiosCreate = axios.create as jest.MockedFunction<typeof axios.create>;
-const mockedAxiosGet = mockAxiosInstance.get as jest.MockedFunction<typeof mockAxiosInstance.get>;
-
-let apiClient: AlphaVantageClient;
-
-beforeEach(() => {
-    mockedAxiosGet.mockClear();
-    mockedAxiosCreate.mockClear();
-    apiClient = new AlphaVantageClient();
-});
-
 describe("Alpha Vantage Global Quote API Tests (MOCKED)", () => {
+    const mockedAxiosCreate = axios.create as jest.MockedFunction<typeof axios.create>;
+    const mockedAxiosGet = mockAxiosInstance.get as jest.MockedFunction<typeof mockAxiosInstance.get>;
+
+    let apiClient: AlphaVantageClient;
+
+    beforeEach(() => {
+        mockedAxiosGet.mockClear();
+        mockedAxiosCreate.mockClear();
+        apiClient = new AlphaVantageClient();
+    });
+
     test("Should return a global quote for a valid symbol (MSFT) when API responds successfully", async () => {
         const symbol = "MSFT";
         mockedAxiosGet.mockResolvedValueOnce({ data: globalQuoteMockResponse });
         const response = await apiClient.getGlobalQuote(symbol);
-        expect(mockedAxiosGet).toHaveBeenCalledTimes(1);
         expect(mockedAxiosGet).toHaveBeenCalledWith(
             '', //base url is already set in the client
             {
@@ -69,21 +49,19 @@ describe("Alpha Vantage Global Quote API Tests (MOCKED)", () => {
         expect(globalQuote).not.toBeNull();
         expect(globalQuote["01. symbol"]).toBe("MSFT");
         expect(Object.keys(globalQuote)).toEqual(GLOBAL_QUOTE_RESPONSE_KEYS);
+        expect(mockedAxiosGet).toHaveBeenCalledTimes(1);
     });
 
     test("Should return an empty Global Quote for a non-existent symbol when API responds as empty", async () => {
         const symbol = "NONEXISTENTSTOCK1234";
-        const mockEmptyResponse: GlobalQuoteAPIResponse = {"Global Quote": {}};
+        const mockEmptyResponse: GlobalQuoteEmptyResponse = { "Global Quote": {} };
         mockedAxiosGet.mockResolvedValueOnce({ data: mockEmptyResponse });
-        const response = await apiClient.getGlobalQuote(symbol);
-        expect(mockedAxiosGet).toHaveBeenCalledTimes(1);
+        const response = await apiClient.getGlobalQuote(symbol) as GlobalQuoteEmptyResponse;
         expect(response).toHaveProperty('Global Quote');
-        if (isGlobalQuoteEmptyResponse(response)) {
-            expect(response['Global Quote']).toEqual({});
-            expect(Object.keys(response['Global Quote'])).toHaveLength(0);
-        } else {
-            fail('Expected an empty Global Quote response, but received a non-empty one.');
-        }
+        expect(response['Global Quote']).toEqual({});
+        expect(Object.keys(response['Global Quote'])).toHaveLength(0);
+        expect(mockedAxiosGet).toHaveBeenCalledTimes(1);
+
     });
 
     test("Should throw AlphaVantageAPIRateLimitError when API responds with a rate limit message", async () => {
@@ -97,12 +75,12 @@ describe("Alpha Vantage Global Quote API Tests (MOCKED)", () => {
             };
             throw new AlphaVantageAPIRateLimitError(response.data.Information);
         });
-    
-        try {await apiClient.getGlobalQuote(symbol);
+        try {
+            await apiClient.getGlobalQuote(symbol);
         } catch (error) {
             expect(error).toBeInstanceOf(AlphaVantageAPIRateLimitError);
             expect((error as AlphaVantageAPIRateLimitError).message).toBe(rateLimitMessage);
-        } 
+        }
         expect(mockedAxiosGet).toHaveBeenCalledTimes(1);
     });
 

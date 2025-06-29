@@ -31,16 +31,6 @@ export interface GlobalQuoteEmptyResponse extends AlphaVantageBaseResponse {
     "Global Quote": EmptyObject; 
 }
 
-export function isGlobalQuoteEmptyResponse(
-    response: GlobalQuoteAPIResponse
-  ): response is GlobalQuoteEmptyResponse {
-    return (
-      'Global Quote' in response &&
-      typeof response['Global Quote'] === 'object' &&
-      response['Global Quote'] !== null &&
-      Object.keys(response['Global Quote']).length === 0
-    );
-  }
 
 export type GlobalQuoteAPIResponse =
     GlobalQuoteSuccessResponse |

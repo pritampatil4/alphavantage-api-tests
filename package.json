@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "tests": "jest",                           
-    "tests:mocked": "jest --testPathPatterns=\\.mocked\\.test\\.ts$",
-    "tests:live": "jest --testPathPatterns=^((?!mocked).)*\\.test\\.ts$", 
-    "tests:watch": "jest --watch",             
-    "tests:coverage": "jest --coverage"      
+    "test": "jest",                           
+    "test:mocked": "jest --testPathPatterns=\\.mocked\\.test\\.ts$",
+    "test:live": "jest --testPathPatterns=^((?!mocked).)*\\.test\\.ts$", 
+    "test:watch": "jest --watch",             
+    "test:coverage": "jest --coverage"      
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
     "jest",
     "typescript"
   ],
-  "author": "Pritam Patil",
+  "author": "Pritam Patil <ppritam821@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/pritampatil4/alphavantage-api-tests/issues"
