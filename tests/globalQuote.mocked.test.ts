@@ -17,7 +17,7 @@ jest.mock('axios', () => {
     return mockedAxios;
 });
 
-describe("Alpha Vantage Global Quote API Tests (MOCKED)", () => {
+describe("[Mocked]: Alpha Vantage Global Quote API Tests", () => {
     const mockedAxiosCreate = axios.create as jest.MockedFunction<typeof axios.create>;
     const mockedAxiosGet = mockAxiosInstance.get as jest.MockedFunction<typeof mockAxiosInstance.get>;
 
